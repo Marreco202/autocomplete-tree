@@ -63,7 +63,23 @@ void inserePalavra(Trie *t, char *palavra)
 
 int buscarPalavra(Trie *t, char *palavra)
 {
- /* implementar a busca de palavras */
+    if(palavra == NULL)
+        return;
+
+    if(palavra == '\0'){
+        if(t->termino)
+            return 1;
+        else
+            return 0;
+        
+    }
+
+    int myIndex = encontraLetra(t->filhos, palavra[0]);
+
+    if(myIndex != -1)
+        buscarPalavra(t->filhos[myIndex],&palavra[1]);
+    else
+        return 0;
 }
 
 
