@@ -66,7 +66,7 @@ int buscarPalavra(Trie *t, char *palavra)
     if(palavra == NULL)
         return;
 
-    if(palavra == '\0'){
+    if(*palavra == '\0'){
         if(t->termino)
             return 1;
         else
@@ -84,7 +84,19 @@ int buscarPalavra(Trie *t, char *palavra)
 
 Trie* buscarPrefixo(Trie *t, char *palavra)
 {
-  /* implementar busca por prefixo */
+    if(palavra == NULL)
+        return NULL;
+    
+    if(*palavra == '\0')
+        return t;
+    
+    int myIndex = encontraLetra(t,palavra[0]);
+
+    if(myIndex == -1)
+        buscarPrefixo(t->filhos[myIndex],&palavra[1]);
+    else
+        printf("Nao encontrei seu prefixo, retornando nulo...\n");
+        return NULL; //talvez exit(1) seja mais adequado ...?
 }
 
 void removerPalavra(Trie *t, char *palavra)
