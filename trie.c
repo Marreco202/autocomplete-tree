@@ -71,7 +71,6 @@ int buscarPalavra(Trie *t, char *palavra)
             return 1;
         else
             return 0;
-        
     }
 
     int myIndex = encontraLetra(t->filhos, palavra[0]);
@@ -91,7 +90,7 @@ Trie* buscarPrefixo(Trie *t, char *palavra)
 void removerPalavra(Trie *t, char *palavra)
 {
  /* implementar remoca de palavras */
-}
+}   
 
 
 void alphabetize2(Trie * t, char prefixo[])
