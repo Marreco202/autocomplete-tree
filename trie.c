@@ -40,21 +40,21 @@ int encontraLetra(Trie filhos[], char target){
 
 void inserePalavra(Trie *t, char *palavra)
 {
-    if(palavra == NULL || palavra == '\0')//caso acabe a palavra, ou nao haja nenhuma palavra
+    if(palavra == '\0'){
+        t->termino = 1; //talvez nao precise, pq o novo no ja nasce com a parada
         return;
-
-    if(t->letra == ' '){  //caso seja o primeiro no
-        t->filhos[0] = criaNo(palavra[0]);
-        inserePalavra(t->filhos[0],&palavra[1]);
-    }
-
+    } else if(palavra == NULL)
+        return;
+    
     int myIndex = encontraLetra(t->filhos,palavra[0]);
 
     if(myIndex != -1){
-        t->filhos[myIndex]->termino = 0; //esse nó nao eh mais o fim
         inserePalavra(t->filhos[myIndex],&palavra[1]); //se encontrou a palavra, passa pra proxima letra e nao precisa inserir
+
     }else{
-        t->filhos[t->ocupacao] = criaNo(palavra[0]); // o indice de ocupacao eh o proximo indice disponivel para inserir
+        Trie* novoNo = criaNo(palavra[0]);
+        novoNo->termino = 0;
+        t->filhos[t->ocupacao] = novoNo; // o indice de ocupacao eh o proximo indice disponivel para inserir
         t->ocupacao++;
         inserePalavra(t->filhos[t->ocupacao - 1],&palavra[1]);
         }
