@@ -4,7 +4,8 @@
 #include<string.h>
 #include "trie.h"
 
-#define TAM 26 //sei la oq é esse tamanho, mas parece importante
+#define TAM 46 //len("pneumoultramicroscopicossilicovulcanoconiotico") na shell do python
+ 
  
 
 Trie *criaNo(char v)
@@ -98,10 +99,38 @@ Trie* buscarPrefixo(Trie *t, char *palavra)
         printf("Nao encontrei seu prefixo, retornando nulo...\n");
         return NULL; //talvez exit(1) seja mais adequado ...?
 }
+//AUX
+char* slice(char* palavra, int ini, int fin){
+
+    char maiorPalavra[TAM];
+    strcpy(maiorPalavra,palavra);
+    //printf("%s || %d",maiorPalavra,strlen(maiorPalavra));
+    char* retorno = (char*) malloc(sizeof(char)*strlen(maiorPalavra));
+
+
+    int i = 0;
+    for(; i< fin; i++)
+        *(retorno+i) = *(maiorPalavra+i);
+    
+
+    retorno[i] = '\0'; //isso aqui talvez de erro, e precise ser i+1, idk
+    return retorno;
+}
+
+//AUX
 
 void removerPalavra(Trie *t, char *palavra)
 {
- /* implementar remoca de palavras */
+    int len = strlen(palavra);
+
+
+    for(int i = 0; i< len; i++){ //talvez len - 1
+
+        char* manipulada = slice(palavra,0, len - i); 
+        Trie* toRemove = buscarPrefixo(t,palavra); //nó a ser removido
+        if(toRemove->termino == 0 && toRemove->ocupacao == 0)
+            liberar(toRemove);
+    }
 }   
 
 
