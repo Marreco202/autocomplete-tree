@@ -41,13 +41,13 @@ int encontraLetra(Trie filhos[], char target){
 
 void inserePalavra(Trie *t, char *palavra)
 {
-    if(palavra == '\0'){
+    if(*palavra == '\0'){
         t->termino = 1; //talvez nao precise, pq o novo no ja nasce com a parada
         return;
     } else if(palavra == NULL)
         return;
     
-    int myIndex = encontraLetra(t->filhos,palavra[0]);
+    int myIndex = encontraLetra(*(t->filhos),palavra[0]);
 
     if(myIndex != -1){
         inserePalavra(t->filhos[myIndex],&palavra[1]); //se encontrou a palavra, passa pra proxima letra e nao precisa inserir
@@ -64,8 +64,10 @@ void inserePalavra(Trie *t, char *palavra)
 
 int buscarPalavra(Trie *t, char *palavra)
 {
-    if(palavra == NULL)
-        return;
+    if(palavra == NULL){
+        printf("ERRO, PALAVRA NULA");
+        exit(1);
+    }
 
     if(*palavra == '\0'){
         if(t->termino)
@@ -74,12 +76,14 @@ int buscarPalavra(Trie *t, char *palavra)
             return 0;
     }
 
-    int myIndex = encontraLetra(t->filhos, palavra[0]);
+    int myIndex = encontraLetra(*(t->filhos), palavra[0]);
 
     if(myIndex != -1)
         buscarPalavra(t->filhos[myIndex],&palavra[1]);
     else
         return 0;
+    
+    return 0;
 }
 
 
@@ -95,9 +99,11 @@ Trie* buscarPrefixo(Trie *t, char *palavra)
 
     if(myIndex == -1)
         buscarPrefixo(t->filhos[myIndex],&palavra[1]);
-    else
+    else{
         printf("Nao encontrei seu prefixo, retornando nulo...\n");
         return NULL; //talvez exit(1) seja mais adequado ...?
+    }
+    return NULL;
 }
 //AUX
 char* slice(char* palavra, int ini, int fin){
@@ -127,7 +133,7 @@ void removerPalavra(Trie *t, char *palavra)
     for(int i = 0; i< len; i++){ //talvez len - 1
 
         char* manipulada = slice(palavra,0, len - i); 
-        Trie* toRemove = buscarPrefixo(t,palavra); //nó a ser removido
+        Trie* toRemove = buscarPrefixo(t,manipulada); //nó a ser removido
         if(toRemove->termino == 0 && toRemove->ocupacao == 0)
             liberar(toRemove);
     }
