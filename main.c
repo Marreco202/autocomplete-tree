@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "trie.h"
 
-int main()
+int main(void)
 {
     Trie *t = criaTrie();
 

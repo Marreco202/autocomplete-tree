@@ -4,7 +4,7 @@
 #include<string.h>
 #include "trie.h"
 
-#define TAM 46 //len("pneumoultramicroscopicossilicovulcanoconiotico") na shell do python
+#define TAM 26
  
  
 
@@ -15,7 +15,9 @@ Trie *criaNo(char v)
     novoNo->letra = v; //letra a ser inserida
 
     novoNo->termino = 1; //asumesse que seja a ultima letra
-    novoNo->filhos[0] = NULL;
+    for(int i = 0; i< TAM; i++){
+        novoNo->filhos[i] = NULL;        
+    }
     novoNo->ocupacao = 0;
 
     return novoNo;
@@ -29,10 +31,12 @@ Trie *criaTrie()
 }
 
 //AUX
-int encontraLetra(Trie filhos[], char target){
+int encontraLetra(Trie* t, char target){
 
-    for(int i = 0; i <26; i++){
-        if(filhos[i].letra == target)
+    for(int i = 0; i < TAM; i++){
+        if(t->filhos[i] == NULL)
+            return -1;
+        if(t->filhos[i]->letra == target)
             return i;
     }
     return -1;
@@ -42,81 +46,101 @@ int encontraLetra(Trie filhos[], char target){
 void inserePalavra(Trie *t, char *palavra)
 {
     if(*palavra == '\0'){
+       // printf("fim da insercao, ultima letra da palavra: %c\n\n",t->letra);
         t->termino = 1; //talvez nao precise, pq o novo no ja nasce com a parada
         return;
     } else if(palavra == NULL)
         return;
-    
-    int myIndex = encontraLetra(*(t->filhos),palavra[0]);
+        
+    if(t->ocupacao == 0){
+       // printf("Nao encontrei nenhum no existente, criando novo no para a letra %c\n",palavra[0]);
+        Trie* nNo = criaNo(palavra[0]);
+        nNo->termino = 0;
+        t->filhos[t->ocupacao] = nNo;
+        t->ocupacao++;
+        return inserePalavra(t->filhos[t->ocupacao - 1],&palavra[1]);
+    }
+
+    int myIndex = encontraLetra(t,palavra[0]);
 
     if(myIndex != -1){
-        inserePalavra(t->filhos[myIndex],&palavra[1]); //se encontrou a palavra, passa pra proxima letra e nao precisa inserir
+        //printf("Encontrei o indice! Nova chamada, proxima letra: %c\n\n",palavra[1]);
+        return inserePalavra(t->filhos[myIndex],&palavra[1]); //se encontrou a palavra, passa pra proxima letra e nao precisa inserir
 
     }else{
+       // printf("Nao encontrei o indice, criando novo no para a letra %c\n",palavra[0]);
         Trie* novoNo = criaNo(palavra[0]);
         novoNo->termino = 0;
         t->filhos[t->ocupacao] = novoNo; // o indice de ocupacao eh o proximo indice disponivel para inserir
         t->ocupacao++;
-        inserePalavra(t->filhos[t->ocupacao - 1],&palavra[1]);
+        return inserePalavra(t->filhos[t->ocupacao - 1],&palavra[1]);
         }
 }
 
 
 int buscarPalavra(Trie *t, char *palavra)
 {
-    if(palavra == NULL){
-        printf("ERRO, PALAVRA NULA");
-        exit(1);
-    }
-
-    if(*palavra == '\0'){
-        if(t->termino)
+    if(palavra[0] == '\0'){
+        //printf("fim da palavra, checando se termino == 1...\n");
+        if(t->termino == 1){
+            //printf("termino = 1, encontrei!\n");
             return 1;
-        else
+
+        }
+        else{
+            //printf("termino != 1, nao encontrei\n");
             return 0;
+        }
     }
 
-    int myIndex = encontraLetra(*(t->filhos), palavra[0]);
-
-    if(myIndex != -1)
-        buscarPalavra(t->filhos[myIndex],&palavra[1]);
-    else
-        return 0;
+    int myIndex = encontraLetra(t, palavra[0]);
+    //printf("myIndex de %c: %d\n",palavra[0],myIndex);
     
-    return 0;
+    if(myIndex != -1){
+        //printf("Encontrei o indice! Nova chamada, proxima letra: %c\n\n",palavra[1]);
+        return buscarPalavra(t->filhos[myIndex],&palavra[1]);
+
+    }
+    else{
+        printf("nao encontrei o indice de %c\n",palavra[0]);
+        return 0;
+    }
 }
 
 
 Trie* buscarPrefixo(Trie *t, char *palavra)
 {
+    //printf("letra da vez: %c\n",palavra[0]);
     if(palavra == NULL)
         return NULL;
     
-    if(*palavra == '\0')
+    if(*palavra == '\0'){
+        //printf("encontrei! ultima letra do prefixo: %c\n",t->letra);
         return t;
+    }
     
+    //printf("buscando indice para %c\n",palavra[0]);
     int myIndex = encontraLetra(t,palavra[0]);
+    //printf("valor de myindex: %d\n",myIndex);
 
-    if(myIndex == -1)
+    if(myIndex != -1){
+        //printf("encontrei! indice para %c: %d\n",palavra[0],myIndex);
         buscarPrefixo(t->filhos[myIndex],&palavra[1]);
+    }
     else{
-        printf("Nao encontrei seu prefixo, retornando nulo...\n");
+        //printf("Nao encontrei seu prefixo, retornando nulo...\n");
         return NULL; //talvez exit(1) seja mais adequado ...?
     }
-    return NULL;
 }
 //AUX
 char* slice(char* palavra, int ini, int fin){
 
-    char maiorPalavra[TAM];
-    strcpy(maiorPalavra,palavra);
-    //printf("%s || %d",maiorPalavra,strlen(maiorPalavra));
-    char* retorno = (char*) malloc(sizeof(char)*strlen(maiorPalavra));
 
+    char* retorno = (char*) malloc(sizeof(char)*(fin - ini + 1));
 
     int i = 0;
     for(; i< fin; i++)
-        *(retorno+i) = *(maiorPalavra+i);
+        *(retorno+i) = *(palavra+i);
     
 
     retorno[i] = '\0'; //isso aqui talvez de erro, e precise ser i+1, idk
@@ -125,20 +149,40 @@ char* slice(char* palavra, int ini, int fin){
 
 //AUX
 
-void removerPalavra(Trie *t, char *palavra)
+void antigaremoverPalavra(Trie *t, char *palavra)
 {
     int len = strlen(palavra);
 
-
     for(int i = 0; i< len; i++){ //talvez len - 1
 
-        char* manipulada = slice(palavra,0, len - i); 
+        char* manipulada = slice(palavra,0, len - i);
+        printf("my slice: %s",manipulada);
         Trie* toRemove = buscarPrefixo(t,manipulada); //nó a ser removido
+
+      
+        printf("hello there!\n");
         if(toRemove->termino == 0 && toRemove->ocupacao == 0)
             liberar(toRemove);
+        
     }
 }   
 
+void removerPalavra(Trie* t, char* palavra){
+
+    if(*palavra!= '\0'){
+        int myIndex = encontraLetra(t,palavra[0]);
+        
+        removerPalavra(t->filhos[myIndex],&palavra[1]);
+    }
+    else if(*palavra == '\0'){
+        t->termino = 0; // se nos quisermos tirar a palavra "car", porem temos a palavra "carro", precisamos trocar apenas o termino
+    }
+
+    if(t->ocupacao == 0){
+        free(t);
+        return;
+    }
+}
 
 void alphabetize2(Trie * t, char prefixo[])
 {
@@ -156,7 +200,7 @@ void alphabetize2(Trie * t, char prefixo[])
             
             int l = strlen(prefixo);
             if(l > 0){
-                char novo_prefixo[l];
+                char novo_prefixo[TAM];
                 strcpy(novo_prefixo, prefixo);
                 strncat(novo_prefixo, &ch, 1); 
                 alphabetize2(t->filhos[i], novo_prefixo);
