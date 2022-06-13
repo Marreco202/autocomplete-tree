@@ -34,8 +34,9 @@ Trie *criaTrie()
 int encontraLetra(Trie* t, char target){
 
     for(int i = 0; i < TAM; i++){
-        if(t->filhos[i] == NULL)
+        if(t->filhos[i] == NULL){
             return -1;
+        }
         if(t->filhos[i]->letra == target)
             return i;
     }
@@ -169,9 +170,15 @@ void antigaremoverPalavra(Trie *t, char *palavra)
 
 void removerPalavra(Trie* t, char* palavra){
 
-    if(*palavra!= '\0'){
+    if(t->letra != palavra[0]){
+        //printf("palavra nao existe");
+        return;
+    }
+
+    else if(*palavra!= '\0'){
+        printf("step %c\n",t->letra);
         int myIndex = encontraLetra(t,palavra[0]);
-        
+
         removerPalavra(t->filhos[myIndex],&palavra[1]);
     }
     else if(*palavra == '\0'){
