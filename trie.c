@@ -6,7 +6,17 @@
 
 #define TAM 26
  
- 
+/*
+Aluno: João Victor Godinho Woitschach
+Matricula: 2011401
+*/
+
+
+/*
+Para melhor entendimento do codigo abaixo, deve-se levar em conta que os nós das letras foram inseridos na ordem de disponibilidade do espaço do vetor.
+Ou seja, o indice [1] nao necessariamente representa a letra 'b', por exemplo
+*/
+
 
 Trie *criaNo(char v)
 {
@@ -16,7 +26,7 @@ Trie *criaNo(char v)
 
     novoNo->termino = 1; //asumesse que seja a ultima letra
     for(int i = 0; i< TAM; i++){
-        novoNo->filhos[i] = NULL;        
+        novoNo->filhos[i] = NULL; 
     }
     novoNo->ocupacao = 0;
 
@@ -31,9 +41,9 @@ Trie *criaTrie()
 }
 
 //AUX
-int encontraLetra(Trie* t, char target){
+int encontraLetra(Trie* t, char target){ //funcao para encontrar o indice do filho de certo nó de certa letra
 
-    for(int i = 0; i < TAM; i++){
+    for(int i = 0; i < t->ocupacao; i++){
         if(t->filhos[i] == NULL){
             return -1;
         }
@@ -44,7 +54,7 @@ int encontraLetra(Trie* t, char target){
 }
 //AUX
 
-void inserePalavra(Trie *t, char *palavra)
+void inserePalavra(Trie *t, char *palavra) 
 {
     if(*palavra == '\0'){
        // printf("fim da insercao, ultima letra da palavra: %c\n\n",t->letra);
@@ -64,7 +74,7 @@ void inserePalavra(Trie *t, char *palavra)
 
     int myIndex = encontraLetra(t,palavra[0]);
 
-    if(myIndex != -1){
+    if(myIndex != -1){ //caso encontre o indice
         //printf("Encontrei o indice! Nova chamada, proxima letra: %c\n\n",palavra[1]);
         return inserePalavra(t->filhos[myIndex],&palavra[1]); //se encontrou a palavra, passa pra proxima letra e nao precisa inserir
 
@@ -103,7 +113,7 @@ int buscarPalavra(Trie *t, char *palavra)
 
     }
     else{
-        printf("nao encontrei o indice de %c\n",palavra[0]);
+       // printf("nao encontrei o indice de %c\n",palavra[0]);
         return 0;
     }
 }
@@ -134,7 +144,7 @@ Trie* buscarPrefixo(Trie *t, char *palavra)
     }
 }
 //AUX
-char* slice(char* palavra, int ini, int fin){
+char* slice(char* palavra, int ini, int fin){ //fatia string
 
 
     char* retorno = (char*) malloc(sizeof(char)*(fin - ini + 1));
@@ -149,47 +159,47 @@ char* slice(char* palavra, int ini, int fin){
 }
 
 //AUX
+ 
 
-void antigaremoverPalavra(Trie *t, char *palavra)
-{
-    int len = strlen(palavra);
-
-    for(int i = 0; i< len; i++){ //talvez len - 1
-
-        char* manipulada = slice(palavra,0, len - i);
-        printf("my slice: %s",manipulada);
-        Trie* toRemove = buscarPrefixo(t,manipulada); //nó a ser removido
-
-      
-        printf("hello there!\n");
-        if(toRemove->termino == 0 && toRemove->ocupacao == 0)
-            liberar(toRemove);
-        
+void showFilhos(Trie* t){ //mostra os filhos de determinado no
+    printf("ocupacao: %d\n",t->ocupacao);
+    for(int i = 0; i< t->ocupacao; i++){
+        printf("indice %d: letra: %c\n",i,t->filhos[i]->letra);
     }
-}   
+    printf("\n");
+}
+
 
 void removerPalavra(Trie* t, char* palavra){
 
-    if(t->letra != palavra[0]){
-        //printf("palavra nao existe");
-        return;
-    }
-
-    else if(*palavra!= '\0'){
-        printf("step %c\n",t->letra);
-        int myIndex = encontraLetra(t,palavra[0]);
-
+    int myIndex = encontraLetra(t,palavra[0]);
+    //printf("letra de t: %c\n",t->letra);
+    //printf("ocupacao de t: %d\n",t->ocupacao);
+    //showFilhos(t);
+    
+    
+    if(*palavra != '\0' && myIndex != -1){//ou seja, encontrou a palavra
+        //printf("encontrei a letra %c !\n\n",t->filhos[myIndex]->letra);
         removerPalavra(t->filhos[myIndex],&palavra[1]);
+        if(t->ocupacao <= 0){
+            free(t);
+        }
     }
-    else if(*palavra == '\0'){
-        t->termino = 0; // se nos quisermos tirar a palavra "car", porem temos a palavra "carro", precisamos trocar apenas o termino
-    }
-
-    if(t->ocupacao == 0){
-        free(t);
+    else if (myIndex == -1 && t->ocupacao > 0 && *palavra != '\0'){
+       // printf("letra nao encontrada, a palavra nao existe\n");
         return;
+    }
+    
+    if(*palavra == '\0'){ //essa condicional so acontece uma vez
+        //printf("tirando o termino do ultimo no\n (%c)",t->letra);
+        t->termino = 0;
+    }
+    
+    if(t->ocupacao <= 0){ // vai cair aqui apenas quando nao tiver filhos
+        //printf("dando free no noh: %c\n",t->letra);
     }
 }
+
 
 void alphabetize2(Trie * t, char prefixo[])
 {
